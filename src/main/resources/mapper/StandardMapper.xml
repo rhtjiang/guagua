@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.StandardMapper">
+    <!-- 查询单项工程汇总的数据 -->
+    <select id="selectStandard" resultType="com.example.entity.StandardTable">
+       SELECT  st.`table_name` FROM standart_table st  LEFT JOIN  table_standard ts ON ts.id = st.`standard_id` WHERE ts.`project_name`=#{project_name};
+    </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.LabelMapper">
+    <!-- 查询所有的标签项 -->
+    <select id="selectLabel" resultType="com.example.entity.Label">
+        select * from t_label
+        <where>
+            <if test="major!=null">major =#{major}</if>
+            <if test="name!=null">and `name` = #{name}</if>
+            <if test="field!=null">and field =#{field}</if>
+        </where>
+
+
+    </select>
+    <!-- 增加标签项 -->
+    <insert id="insertLabel" parameterType="com.example.entity.Label">
+        insert into t_label (field,name,major) values (#{field},#{name},#{major})
+    </insert>
+    <!-- 修改标签项 -->
+    <update id="updateLabel" parameterType="com.example.entity.Label">
+        update t_label set field =#{field},`name` = #{name},major = #{major} where id =#{id}
+    </update>
+</mapper>

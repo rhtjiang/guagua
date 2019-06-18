@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.LabelCarMapper">
+
+
+    <insert id="insertLabelCar" parameterType="List">
+        insert into label (uid,label_id,label_name,label_value) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.uid},#{item.label_id},#{item.label_name},#{item.label_value})
+        </foreach>
+    </insert>
+
+</mapper>

@@ -1,0 +1,66 @@
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/view/
+      suffix: .jsp
+    dispatch-options-request: true
+  http:
+    encoding:
+      charset: utf-8
+      force: true
+      enabled: true
+
+  datasource:
+    dbcp1:
+      url: jdbc:hive2://192.168.100.11:21050/impala_kudu;AuthMech=0;auth=noSasl
+      username: ""
+      password: ""
+      driver-class-name: org.apache.hive.jdbc.HiveDriver
+      type: com.alibaba.druid.pool.DruidDataSource
+      initialSize: 5
+      minIdle: 5
+      maxIdle: 100
+      maxActive: 100
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 'X'
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+        ### 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+      filters: stat,wall,log4j
+      maxPoolPreparedStatementPerConnectionSize: 20
+      useGlobalDataSourceStat: true
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+    dbcp2:
+      url: jdbc:mysql://192.168.100.11:3306/excel01?useUnicode\=true&characterEncoding\=utf-8&zeroDateTimeBehavior\=convertToNull&useSSL=false
+      username: root
+      password: Keduox1234!
+      driver-class-name: com.mysql.jdbc.Driver
+      type: com.alibaba.druid.pool.DruidDataSource
+      initialSize: 5
+      minIdle: 5
+      maxIdle: 20
+      maxActive: 20
+      maxWait: 60000
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+mybatis:
+  mapper-locations: classpath:/mapper/**Mapper.xml
+  type-aliases-package: com.example.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+
+
+

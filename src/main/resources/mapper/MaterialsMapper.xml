@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.MaterialsMapper">
+    <!-- 查材料表 -->
+  <select id="selectMaterials" resultType="com.example.entity.Materials">
+      select * from bid_materials
+      <where>
+          <if test="maplnfo_name!=null"> maplnfo_name =#{maplnfo_name}</if>
+          <if test="single_name!=null"> and single_name = #{single_name}</if>
+          <if test="unit_engineering!=null"> and unit_engineering =#{unit_engineering}</if>
+      </where>
+  </select>
+
+    <!-- 将实例项目中指定数据存入到标准项目中 -->
+    <insert id="insertM2ToM2" parameterType="com.example.entity.Materials">
+        insert into bid_materials select * from bid_materials2 where maplnfo_name =#{maplnfo_name} and single_name = #{single_name}
+    </insert>
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+        <!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.SumCatMapper">
+<!-- 查询单项工程汇总的数据 -->
+<select id="selectSumM" resultType="com.example.entity.SumCats">
+
+
+    <choose>
+        <when test="id !=null">
+            select * from first1 where id =#{id}
+        </when>
+        <otherwise>
+            select * from first1
+        </otherwise>
+    </choose>
+
+</select>
+<!-- 修改 -->
+<update id="updateK" parameterType="com.example.entity.SumCats">
+        update first1 set name = #{name} where id = #{id}
+    </update>
+<!-- 删除-->
+<delete id="deleteK" parameterType="int">
+        delete from first1 where id = #{id}
+    </delete>
+<!-- 增加 -->
+<insert id="insertK" parameterType="com.example.entity.SumCats">
+      insert into first1 (id,name) values (#{id},#{name})
+    </insert>
+</mapper>

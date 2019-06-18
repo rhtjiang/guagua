@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.PartialMapper">
+    <!-- 查询分部分项表数据 -->
+    <select id="selectPartial" resultType="com.example.entity.Partial">
+        select uid,bop,project_name,signalment as signalment,prickle,amount,integrated_unit_price,maplnfo_name,
+        single_name, unit_engineering, partial_name from bid_partial
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+            <if test="partial_name!=null">and partial_name =#{partial_name}</if>
+        </where>
+    </select>
+    <!-- 将分部分项表，按照一定的方式分类汇总 -->
+    <select id="selectAllPars" resultType="com.example.entity.Partial">
+        <choose>
+            <when test="single_name ==null">
+                select sum(amount*integrated_unit_price) as amount,maplnfo_name,single_name from bid_partial where
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null and unit_engineering ==null">
+                select sum(amount*integrated_unit_price) as amount,maplnfo_name,single_name,unit_engineering from
+                bid_partial where maplnfo_name =#{maplnfo_name} group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+            <when test="single_name !=null and unit_engineering !=null">
+                select sum(amount*integrated_unit_price) as
+                amount,maplnfo_name,single_name,unit_engineering,partial_name from
+                bid_partial where maplnfo_name =#{maplnfo_name} and single_name = #{single_name} and unit_engineering
+                =#{unit_engineering} group by
+                maplnfo_name,single_name,unit_engineering,partial_name
+            </when>
+        </choose>
+    </select>
+
+    <!--对比模板和新导入项目的分部分项数据查看是否有漏项行为，相似项目中暂时以项目名称作为依据-->
+    <select id="analPar" resultType="com.example.entity.Partial">
+        <!--select bp.bop,bp.project_name,bp.signalment as signalment,bp.prickle,bp.amount,bp.integrated_unit_price,bp.maplnfo_name,bp.single_name, bp.unit_engineering, bp.partial_name  from bid_partial bp where not exists (select 1 from bid_partial2 bp2 where strleft(bp2.bop,9) = strleft(bp.`bop`,9) AND bp.project_name = bp2.project_name and bp.single_name =bp2.single_name and bp.unit_engineering =bp2.unit_engineering and bp2.maplnfo_name =#{maplnfo_name})  and bp.maplnfo_name ='仪陇县国有林场棚户区(危旧房)改造工程'  and bp.single_name =#{single_name} ;-->
+        select bp.bop,bp.project_name,bp.signalment as signalment, bp.unit_engineering,bp.partial_name,bp.prickle from
+        stand_partial bp
+        where not exists (select 1 from bid_partial2 bp2 where strleft(bp2.bop,9) = strleft(bp.`bop`,9) AND
+        bp.project_name = bp2.project_name and bp.unit_engineering =bp2.unit_engineering and bp2.maplnfo_name
+        =#{maplnfo_name} and bp2.single_name =#{single_name}) and bp.m_name =#{m_name};
+    </select>
+
+    <!--对比模板和新导入项目的分部分项数据查看是否有多项行为，相似项目中暂时以项目名称作为依据-->
+    <select id="analpars" resultType="com.example.entity.Partial">
+        <!-- select bp2.bop,bp2.project_name,bp2.signalment as signalment,bp2.prickle,bp2.amount,bp2.integrated_unit_price,bp2.maplnfo_name,bp2.single_name, bp2.unit_engineering, bp2.partial_name  from bid_partial2 bp2 where not exists (select 1 from bid_partial bp where bp.maplnfo_name ='仪陇县国有林场棚户区(危旧房)改造工程' and strleft(bp.bop,9) = strleft(bp2.`bop`,9) AND bp.project_name = bp2.project_name and bp.single_name =bp2.single_name and bp.unit_engineering =bp2.unit_engineering) and bp2.maplnfo_name =#{maplnfo_name} and bp2.single_name =#{single_name};-->
+
+        select bp2.uid,bp2.bop,bp2.project_name,bp2.signalment as
+        signalment,bp2.prickle,bp2.amount,bp2.integrated_unit_price,bp2.maplnfo_name,bp2.single_name,
+        bp2.unit_engineering, bp2.partial_name from bid_partial2 bp2 where not exists (select 1 from stand_partial bp
+        where bp.m_name =#{m_name} and strleft(bp.bop,9) = strleft(bp2.`bop`,9) AND bp.project_name = bp2.project_name
+        and
+        bp.unit_engineering =bp2.unit_engineering) and bp2.maplnfo_name =#{maplnfo_name} and bp2.single_name
+        =#{single_name};
+    </select>
+
+    <!-- 通过去重查询获取标准项目库建设项目名称 -->
+    <select id="selectProjectName" resultType="com.example.entity.Partial">
+     select distinct (maplnfo_name) from bid_partial
+  </select>
+
+    <!-- 通过去重查询获取实例中建设项目名称 -->
+    <select id="selectProjectNames" resultType="com.example.entity.Partial">
+     select distinct (maplnfo_name) from bid_partial2
+    </select>
+
+    <!-- 通过去重查询获取实例的单项项目名称 -->
+    <select id="selectSiName" resultType="com.example.entity.Partial">
+     select distinct (single_name) from bid_partial2 where maplnfo_name =#{maplnfo_name}
+    </select>
+
+    <!-- 通过去重获取模板的项目名称-->
+
+    <resultMap id="standp" type="com.example.entity.Partial">
+        <result column="m_name" property="maplnfo_name"/>
+    </resultMap>
+    <select id="selectStand" resultMap="standp">
+        select distinct (m_name) from stand_partial
+    </select>
+
+    <!-- 将漏项数据添加进实例项目 -->
+    <insert id="insertPa" parameterType="com.example.entity.Partial">
+        insert into bid_partial2
+        (uid,maplnfo_name,unit_engineering,single_name,partial_name,bop,project_name,signalment,prickle,amount,integrated_unit_price)
+        values
+        (#{p.uid},#{p.maplnfo_name},#{p.unit_engineering},#{p.single_name},#{p.partial_name},#{p.bop},#{p.project_name},#{p.signalment},#{p.prickle},#{p.amount},#{p.integrated_unit_price});
+    </insert>
+
+    <!-- 将多项中的清单项删除 -->
+    <delete id="deletePa" parameterType="java.lang.String">
+        DELETE FROM bid_partial2 where uid = #{uid}
+    </delete>
+
+    <!-- 查询实例表中数据 -->
+    <select id="selectPartial2" resultType="com.example.entity.Partial">
+        select bop,project_name,signalment as signalment,prickle,amount,integrated_unit_price,maplnfo_name,
+        single_name, unit_engineering, partial_name from bid_partial2
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+            <if test="partial_name!=null">and partial_name =#{partial_name}</if>
+        </where>
+    </select>
+
+    <!-- 将实例数据添加到模板中 -->
+    <insert id="insertStand" parameterType="com.example.entity.Partial">
+        insert into stand_partial select uid,#{m_name},unit_engineering,bop,project_name,partial_name,signalment,prickle  from bid_partial2 where maplnfo_name = #{maplnfo_name} and single_name =#{single_name}
+    </insert>
+
+    <!-- 查询指定模板库中数据 -->
+    <resultMap id="standps" type="com.example.entity.Partial">
+        <result column="m_name" property="maplnfo_name"/>
+    </resultMap>
+    <select id="selectStandPa" resultMap="standps">
+        select * from stand_partial where m_name = #{m_name}
+    </select>
+
+
+    <!-- 将实例项目中指定数据存入到标准项目中 -->
+    <insert id="insertP2ToP2" parameterType="com.example.entity.Partial">
+        insert into bid_partial select * from bid_partial2 where maplnfo_name =#{maplnfo_name} and single_name = #{single_name}
+    </insert>
+
+    <!-- 多条件搜索标准数据库数据 -->
+    <select id="searchMCD" resultType="com.example.entity.Partial">
+        select bop,project_name,signalment as signalment,prickle,amount,integrated_unit_price,maplnfo_name,
+        single_name, unit_engineering, partial_name from bid_partial where maplnfo_name = #{maplnfo_name} and
+        single_name = #{single_name} and unit_engineering =#{unit_engineering}
+        <if test="searchs!= null and searchs !=''">
+            and concat(bop,project_name,signalment,prickle) like concat(concat('%',#{searchs}),'%')
+        </if>
+    </select>
+
+
+    <!-- 查询每一个清单项的标签 -->
+    <resultMap id="car" type="com.example.entity.Partial">
+        <result column="uid" property="uid"/>
+        <result column="bop" property="bop"/>
+        <result column="maplnfo_name" property="maplnfo_name"/>
+        <result column="single_name" property="single_name"/>
+        <result column="unit_engineering" property="unit_engineering"/>
+        <result column="partial_name" property="partial_name"/>
+        <result column="project_name" property="project_name"/>
+        <result column="build_type" property="build_type"/>
+
+        <collection property="labelCar" ofType="com.example.entity.LabelCar">
+            <result column="label_id" property="label_id"/>
+            <result column="label_name" property="label_name"/>
+            <result column="label_value" property="label_value"/>
+        </collection>
+    </resultMap>
+    <select id="selectPaLabel" resultMap="car">
+       select l.label_id,l.label_name,l.label_value,bp.uid,bp.bop,bp.maplnfo_name,bp.single_name,bp.unit_engineering,bp.partial_name,bp.project_name,bp.build_type from label l left join  bid_partial bp on bp.uid = l.label_id
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+        </where>
+    </select>
+</mapper>

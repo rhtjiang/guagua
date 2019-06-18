@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.SaveSumMapper">
+
+     <!-- 存单项工程表总额 -->
+    <insert id="insertSingle" parameterType="List">
+        insert into single_sum (maplnfo_name,single_name,sum_money,salfe_money,fees_money) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.maplnfo_name},#{item.single_name},#{item.sum_money},#{item.salfe_money},#{item.fees_money})
+        </foreach>
+    </insert>
+
+
+    <!-- 按照项目名称查询单项工程汇总 -->
+    <select id="selectSingle" resultType="com.example.entity.Single">
+        select * from single_sum where maplnfo_name = #{maplnfo_name}
+    </select>
+
+    <!-- 存单位工程汇总数据 -->
+    <insert id="insertUnits" parameterType="List">
+        insert into unit_sum (maplnfo_name,single_name,unit_engineering,sum_money,salfe_money,fees_money) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.maplnfo_name},#{item.single_name},#{item.unit_engineering},#{item.sum_money},#{item.salfe_money},#{item.fees_money})
+        </foreach>
+    </insert>
+
+    <!-- 按照项目名称以及单项工程名称获取单位汇总数据 -->
+    <!-- 按照项目名称查询单项工程汇总 -->
+    <select id="selectUnits" resultType="com.example.entity.Units">
+        select * from unit_sum where maplnfo_name = #{maplnfo_name} and single_name = #{single_name}
+    </select>
+</mapper>

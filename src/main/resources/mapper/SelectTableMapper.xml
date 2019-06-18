@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.SelectTableMapper">
+
+    <resultMap id="record" type="com.example.entity.list_dic">
+        <id column="uid" property="uid"/>
+        <result column="t_name" property="t_name"/>
+        <result column="name" property="name"/>
+        <collection property="relates" ofType="com.example.entity.list_relate">
+            <result column="item_id" property="item_id"/>
+            <result column="orders" property="orders"/>
+        </collection>
+    </resultMap>
+    <select id="selectTablePar" resultMap="record">
+        <!-- SELECT ld.`name`,ld.`t_name`,ld.`orders`,ld.`status` FROM list_item li LEFT JOIN list_dic ld ON ld.`uid` = li.`id` AND li.plan = ld.`orders`  WHERE li.`maplnfo_name` =#{maplnfo_name} AND li.`single_name`=#{single_name} AND li.`unit_name`=#{unit_engineering} AND li.`partial_name` =#{partial_name} AND li.`project_name`=#{project_name}-->
+        SELECT lr.item_id,lr.orders,ld.uid,ld.`name`,ld.`t_name` FROM list_relate lr LEFT JOIN list_item li ON li.`id` =
+        lr.`item_id` JOIN list_dic ld ON ld.`uid` = lr.`dic_id` WHERE lr.`status`='需填写' AND li.`maplnfo_name`
+        =#{maplnfo_name} AND li.`single_name`=#{single_name} AND li.`unit_name`=#{unit_engineering} AND
+        li.`partial_name` =#{partial_name} AND li.`project_name`=#{project_name}
+    </select>
+    <!-- 将数据插入到回填土施工记录表中 -->
+    <insert id="insertRecord" parameterType="com.example.entity.Record">
+        insert into t_record (maplnfo_name,single_name,unit_name,partial_name,project_name,old_match,new_match,signalment,item_id) values (#{r.maplnfo_name},#{r.single_name},#{r.unit_name},#{r.partial_name},#{r.project_name},#{r.old_match},#{r.new_match},#{r.signalment},#{r.item_id})
+    </insert>
+    <!-- 修改回填土清单项中，回填土施工记录表的状态为已完成 -->
+    <update id="updateRecordStatus" parameterType="com.example.entity.Record">
+        UPDATE list_relate SET `status` = '已完成' WHERE item_id = #{item_id} AND dic_id = #{dic_id};
+    </update>
+
+    <update id="updateRelateStatus" parameterType="com.example.entity.list_relate">
+    UPDATE list_relate SET `status` = '需填写' WHERE item_id = #{item_id} AND dic_id = #{relate_id}
+    </update>
+
+    <!-- 获取每张记录表的下一级关联表 -->
+   <select id="selectT_relate" resultType="java.lang.Integer">
+      select relate_id from t_relate where dic_id = #{dic_id};
+   </select>
+    <!-- 查询施工记录表的内容 -->
+    <select id="selectRecord" resultType="com.example.entity.Record">
+        select * from t_record where item_id = #{item_id}
+    </select>
+
+    <!-- 获取每张记录表的下一级关联表 -->
+    <select id="selectT" resultType="com.example.entity.list_dic">
+      select * from list_dic where uid = #{dic_id};
+   </select>
+
+    <!-- 将数据存入到approcal中 -->
+    <insert id="insertApproval" parameterType="com.example.entity.Approval">
+        insert into t_approval (maplnfo_name,single_name,unit_name,partial_name,project_name,old_match,new_match,signalment,item_id,dic_id) values (#{a.maplnfo_name},#{a.single_name},#{a.unit_name},#{a.partial_name},#{a.project_name},#{a.old_match},#{a.new_match},#{a.signalment},#{a.item_id},#{a.dic_id})
+    </insert>
+
+</mapper>

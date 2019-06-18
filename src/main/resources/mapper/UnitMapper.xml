@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.UnitMapper">
+
+    <!-- 查单价措施表 -->
+    <select id="selectUnit" resultType="Unit">
+        select bop,project_name,signalment as signalment,prickle,amount,integrated_unit_price,maplnfo_name,
+        single_name, unit_engineering, partial_name from bid_unit
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+            <if test="partial_name!=null">and partial_name =#{partial_name}</if>
+        </where>
+    </select>
+    <!-- 单价措施表按照建设项目，单项工程，专业进行汇总 -->
+    <select id="selectAllUnits" resultType="Unit">
+
+        <choose>
+            <when test="single_name ==null">
+                select sum(amount*integrated_unit_price) as amount,maplnfo_name,single_name from bid_unit where
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null and unit_engineering ==null">
+                select sum(amount*integrated_unit_price) as amount,maplnfo_name,single_name,unit_engineering from
+                bid_unit where maplnfo_name =#{maplnfo_name}  group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+            <when test="single_name !=null and unit_engineering !=null">
+                select sum(amount*integrated_unit_price) as amount,maplnfo_name,single_name,unit_engineering,partial_name from
+                bid_unit where maplnfo_name =#{maplnfo_name} and single_name = #{single_name} and unit_engineering =#{unit_engineering} group by
+                maplnfo_name,single_name,unit_engineering,partial_name
+            </when>
+        </choose>
+
+    </select>
+
+    <!-- 获取建筑面积 -->
+    <select id="selectAreas" resultType="Unit">
+     <choose>
+         <when test="maplnfo_name !=null and single_name !=null">
+             select max (case when project_name='综合脚手架' then amount else 1 end ) as amount,maplnfo_name,single_name from bid_unit where maplnfo_name=#{maplnfo_name} and single_name=#{single_name} and unit_engineering='建筑与装饰工程' and partial_name='脚手架工程' group by maplnfo_name,single_name
+         </when>
+         <when test="maplnfo_name !=null and single_name ==null">
+             select max (case when project_name='综合脚手架' then amount else 1 end ) as amount,maplnfo_name,single_name from bid_unit where maplnfo_name=#{maplnfo_name} and unit_engineering='建筑与装饰工程' and partial_name='脚手架工程' group by maplnfo_name,single_name
+         </when>
+     </choose>
+
+
+    </select>
+
+    <!-- 将实例项目中指定数据存入到标准项目中 -->
+    <insert id="insertU2ToU2" parameterType="com.example.entity.Unit">
+        insert into bid_unit select * from bid_unit2 where maplnfo_name =#{maplnfo_name} and single_name = #{single_name}
+    </insert>
+
+</mapper>

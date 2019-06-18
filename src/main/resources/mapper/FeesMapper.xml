@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.FeesMapper">
+
+    <!-- 查规费税金表 -->
+    <select id="selectFees" resultType="Fees">
+        select * from bid_fees
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+        </where>
+    </select>
+
+    <!-- 将规费税金表，按照建设项目，单项工程，专业进行汇总 -->
+    <select id="selectAllFees" resultType="Fees">
+
+        <choose>
+            <when test="single_name ==null">
+                select sum(base*rate*0.01) money,maplnfo_name,single_name from bid_fees where
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null">
+                select sum(base*rate*0.01) money,maplnfo_name,single_name,unit_engineering from bid_fees where
+                maplnfo_name =#{maplnfo_name} group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+        </choose>
+
+
+    </select>
+
+    <!-- 对规费进行统计 -->
+    <select id="selectFe" resultType="Fees">
+
+        <choose>
+            <when test="single_name ==null">
+                select sum(base*rate*0.01) money,maplnfo_name,single_name from bid_fees where project_name !='销项增值税额'and
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null">
+                select sum(base*rate*0.01) money,maplnfo_name,single_name,unit_engineering from bid_fees where
+                project_name !='销项增值税额'and
+                maplnfo_name =#{maplnfo_name} group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+        </choose>
+
+
+    </select>
+
+
+    <insert id="insertF2ToF2" parameterType="com.example.entity.Fees">
+        insert into bid_fees select * from bid_fees2 where maplnfo_name =#{maplnfo_name} and single_name = #{single_name}
+    </insert>
+
+
+</mapper>

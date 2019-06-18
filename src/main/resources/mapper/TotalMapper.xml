@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--namespace名称与mapper接口全路径一致-->
+<mapper namespace="com.example.mapper.TotalMapper">
+
+
+    <!-- 查总价措施表 -->
+    <select id="selectTotal" resultType="com.example.entity.Total">
+        select * from bid_all
+        <where>
+            <if test="maplnfo_name!=null">maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+        </where>
+    </select>
+    <!-- 按需汇总 -->
+    <select id="selectAllTotals" resultType="com.example.entity.Total">
+
+        <choose>
+            <when test="single_name ==null">
+                select sum(money*1) money,maplnfo_name,single_name from bid_all where project_name != '安全文明施工' and
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null">
+                select sum(money*1) money,maplnfo_name,single_name,unit_engineering from bid_all where project_name !=
+                '安全文明施工' and maplnfo_name =#{maplnfo_name} group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+        </choose>
+
+
+    </select>
+
+
+    <!-- 分组查询安全文明费 -->
+    <select id="selectSalf" resultType="com.example.entity.Total">
+
+        <choose>
+            <when test="single_name ==null">
+                select sum(money*1) money,maplnfo_name,single_name from bid_all where project_name = '安全文明施工' and
+                maplnfo_name =#{maplnfo_name} group by maplnfo_name,single_name
+            </when>
+            <when test="single_name !=null">
+                select sum(money*1) money,maplnfo_name,single_name,unit_engineering from bid_all where project_name =
+                '安全文明施工' and maplnfo_name =#{maplnfo_name} group by
+                maplnfo_name,single_name,unit_engineering
+            </when>
+        </choose>
+
+
+    </select>
+
+   <!-- <select id="selectSalf" resultType="com.example.entity.Total">
+        select * from bid_all
+        <where>
+            project_name = '安全文明施工'
+            <if test="maplnfo_name!=null">and maplnfo_name =#{maplnfo_name}</if>
+            <if test="single_name!=null and single_name!='1'">and single_name = #{single_name}</if>
+            <if test="unit_engineering!=null">and unit_engineering =#{unit_engineering}</if>
+        </where>
+    </select>-->
+
+    <!-- 通过去重查询获取标准项目库建设项目名称 -->
+    <select id="selectProjectName" resultType="com.example.entity.Total">
+     select distinct (maplnfo_name) from bid_all
+  </select>
+
+    <!-- 将实例项目中指定数据存入到标准项目中 -->
+    <insert id="insertT2ToT2" parameterType="com.example.entity.Total">
+        insert into bid_all select * from bid_all2 where maplnfo_name =#{maplnfo_name} and single_name = #{single_name}
+    </insert>
+</mapper>
